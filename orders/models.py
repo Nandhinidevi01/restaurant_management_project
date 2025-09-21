@@ -21,3 +21,12 @@ class order(models.Model):
 
     def __str__(self):
         return f"Order #{self.id} - {self.customer}"
+
+class OrderStatus(models.Model):
+    """
+    Represents different statuses for an order
+    """
+    name = models.CharField(max_length=50, unique=True)
+    
+    def __str__(self):
+        return self.name
