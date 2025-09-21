@@ -30,3 +30,17 @@ class OrderStatus(models.Model):
     
     def __str__(self):
         return self.name
+
+from orders.utils import generate_coupon_code
+
+class Coupon(models.Model):
+    code = models.CharField(max_length=20, unique=True, blank=True)
+    discount = models.DecimalField(max_digits=5, decimal_places=2)  #Example
+
+    def save(self, *args, **kwargs):
+        if not self.code: #Auto-generate only if empty
+            self.code = generate_coupon_code()
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.code} - {self.discount}%"
