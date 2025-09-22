@@ -9,6 +9,8 @@ from rest_framework.response import Response
 from home.models import MenuItem
 from home.serializers import MenuItemSerializer
 from rest_framework.pagination import PageNumberPagination
+from rest_framework import status, viewsets
+from rest_framework.permissions import IsAdminUser
 
 
 class MenuCategoryListView(ListAPIView):
@@ -40,3 +42,27 @@ class MenuItemSearchViewSet(viewSets.viewSet):
         serializer = MenuItemSerializer(page, many=True)
 
         return paginator.get_paginated_response(serializer.data)
+
+class MenuItemUpdateViewSet(viewsets.viewSet):
+    """
+    API endpoint to update an existing menu item.
+    Only admin users can update.
+    """
+    permission_classes = [IsAdminUser]
+
+    def update(self, request, pk=None):
+        try:
+            menu_item = MenuItem.objects.get(pk=pk)
+        except MenuItem.DoesNotExist:
+            return Response(
+                {"error": "Menu item not found"},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        
+        serializer = MenuItemSerializer(menu_item, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+        return Response(serializer.errors, status=status.HTTP_404_BAD_REQUEST)
+        
