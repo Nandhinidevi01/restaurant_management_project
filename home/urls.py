@@ -7,6 +7,6 @@ urlpatterns = [
 ]
 
 menu_item_search = MenuItemSearchViewSet.as_view({'get': 'list'})
-urlpatterns = [
+urlpatterns1 = [
     path('menu-items/search/', menu_item_search, name='menu-item-search'),
 ]
