@@ -10,6 +10,8 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
 from .models import Order
 from .serializers import OrderSerializer
+from rest_framework.generics import RetrieveAPIView
+from .serializers import OrderDetailSerializer
 
 
 class SignupView(views.APIView):
@@ -42,3 +44,11 @@ class OrderHistoryView(APIView):
         serializer = OrderSerializer(orders, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
         
+class OrderDetailView(RetrieveAPIView):
+    """
+    Retrieve details of a specific order by ID.
+    """
+    queryset = Order.objects.all()
+    serializer_class = OrderDetailSerializer
+    permission_classes = [IsAuthenticated]
+    lookup_field = "id"
