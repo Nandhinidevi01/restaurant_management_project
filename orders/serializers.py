@@ -15,3 +15,12 @@ class OrderSerializer(serializers.ModelSerializer):
         model = Order
         fields = ['id', 'created_at', 'total_price', 'status', 'items']
         
+class OrderDetailSerializer(serializers.ModelSerializer):
+    items = OrderItemSerializer(many=True, read_only=True)
+    status_name = serializers.CharField(source="status.name", read_only=True)
+    user = serializers.StringRelatedField()
+
+    class Meta:
+        model = Order
+        fields = ["id", "user", "created_at", "total_price", "status_name", "items"]
+        
