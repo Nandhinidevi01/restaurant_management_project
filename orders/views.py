@@ -12,6 +12,7 @@ from .models import Order
 from .serializers import OrderSerializer
 from rest_framework.generics import RetrieveAPIView
 from .serializers import OrderDetailSerializer
+from orders.utils import send_order_confirmation_email
 
 
 class SignupView(views.APIView):
@@ -52,3 +53,14 @@ class OrderDetailView(RetrieveAPIView):
     serializer_class = OrderDetailSerializer
     permission_classes = [IsAuthenticated]
     lookup_field = "id"
+
+def place_order(request):
+    #Example usage after creating an order
+    order = ... #your order instance
+    response = send_order_confirmation_email(
+        order_id=order.id,
+        customer_email=order.user.email,
+        user_name=order.user.username,
+        total_price=order.total_price, 
+    )
+    print(response)  #for debugging
