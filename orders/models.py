@@ -91,12 +91,12 @@ class Order(models.Model):
     def __str__(self):
         return f"Order #{self.id} - {self.customer.username} - {self.status}"
 
-from orders.models import Order
+from Orders.models import Order
 
 #create some test orders
-order.objects.create(customer_id=1, total_price=200, status="pending")
-order.objects.create(customer_id=1, total_price=150, status="processing")
-order.objects.create(customer_id=1, total_price=300, status="completed")
+Order.objects.create(customer_id=1, total_price=200, status="pending")
+Order.objects.create(customer_id=1, total_price=150, status="processing")
+Order.objects.create(customer_id=1, total_price=300, status="completed")
 
 # Retrieve only active orders
 active_orders = Order.objects.get_active_orders()
