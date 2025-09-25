@@ -67,3 +67,37 @@ class OrderItem(models.Model):
     def __str__(self):
         return f"{self.menu_item.name} (x{self.quantity})"
         
+class ActiveOrderManager(models.Manager):
+    def get_active_orders(self):
+        # Return only orders with status 'pending' or 'processing'
+        return super().get_queryset().filter(status__in=['pending', 'processing'])
+
+class Order(models.Model):
+    STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('processing', 'Processing'),
+        ('completed', 'Completed'),
+        ('cancelled', 'Cancelled'),
+    ]
+
+    customer = models.ForeignKey('auth.User', on_delete=models.CASCADE)
+    order_date = models.DateTimeField(auto_now_add=True)
+    total_price = models.DecimalField(max_digits=10, decimal_places=2)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+
+    #custom manager
+    objects = ActiveOrderManager()
+
+    def __str__(self):
+        return f"Order #{self.id} - {self.customer.username} - {self.status}"
+
+from orders.models import Order
+
+#create some test orders
+order.objects.create(customer_id=1, total_price=200, status="pending")
+order.objects.create(customer_id=1, total_price=150, status="processing")
+order.objects.create(customer_id=1, total_price=300, status="completed")
+
+# Retrieve only active orders
+active_orders = Order.objects.get_active_orders()
+print(active_orders)
