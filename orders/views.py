@@ -13,6 +13,7 @@ from .serializers import OrderSerializer
 from rest_framework.generics import RetrieveAPIView
 from .serializers import OrderDetailSerializer
 from orders.utils import send_order_confirmation_email
+from .utils import generate_unique_order_id
 
 
 class SignupView(views.APIView):
@@ -64,3 +65,13 @@ def place_order(request):
         total_price=order.total_price, 
     )
     print(response)  #for debugging
+
+
+def create_order(request):
+    if request.method == 'POST':
+        order = Order.objects.create(
+            order_id=generate_unique_order_id(),
+            customer_name=request.POST.get('customer_name'),
+            total_amount=request.POST.get('total_amount')
+        )
+        return render(request, 'orde_succes.html', {'order': oreder})
