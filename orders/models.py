@@ -6,6 +6,7 @@ from .models import OrderStatus # if OrderStatus is in the same app(orders)
 from django.contrib.auth.models import User
 from menu.models import MenuItem
 from .models import OrderStatus
+from .utils import generate_unique_order_id
 
 
 class order(models.Model):
@@ -101,3 +102,19 @@ Order.objects.create(customer_id=1, total_price=300, status="completed")
 # Retrieve only active orders
 active_orders = Order.objects.get_active_orders()
 print(active_orders)
+
+
+class Order(models.Model):
+    order_id = models.CharField(
+        max_length=10,
+        unique=True,
+        editable=False,
+        default=generate_unique_order_id
+    )
+    #other fields for your order
+    customer_name = models.CharField(max_length=255)
+    total_amount = models.DecimalField(max_digits=10, decimal_places=2)
+    Created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.order_id
