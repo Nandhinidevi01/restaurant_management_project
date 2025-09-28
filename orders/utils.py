@@ -1,6 +1,8 @@
 import string
 import secrets
 from orders.models import Coupon  #Assuming you have a Coupon model
+from .models import Order
+
 
 def generate_coupon_code(length=10):
     """
@@ -54,3 +56,22 @@ def send_order_confirmation_email(order_id, customer_email, user_name, total_pri
     except Exception as e:
         logger.error(f"Error sending order confirmation email: {e}")
         return {"success": False, "message": f"Failed to send email: {e}"}
+
+def generate_unique_order_id(length=8):
+    """
+    Generate a unique, short alphanumeric ID for orders.
+
+    Args:
+        length (int): Length of the generated ID, Default is 8.
+
+    Returns:
+        str: A unique order ID.
+    """
+    characters = string.ascii_upperCase + string.digits
+    while True:
+        #generate a random string
+        new_id = ''.join(secrets.choice(characters) for _ in range(length))
+
+        #check if the ID already exixts in the database
+        if not Order.objects.filter(order_id=new_id).exists():
+            return new_id
