@@ -11,6 +11,10 @@ from home.serializers import MenuItemSerializer
 from rest_framework.pagination import PageNumberPagination
 from rest_framework import status, viewsets
 from rest_framework.permissions import IsAdminUser
+from rest_framework.generics import CreateAPIView
+from rest_framework.permissions import AllowAny
+from .models import ContactFormSubmission
+from .serializers import ContactFormSubmissionSerializer
 
 
 class MenuCategoryListView(ListAPIView):
@@ -65,4 +69,8 @@ class MenuItemUpdateViewSet(viewsets.viewSet):
             return Response(serializer.data, status=status.HTTP_200_OK)
 
         return Response(serializer.errors, status=status.HTTP_404_BAD_REQUEST)
-        
+
+class ContactFormSubmissionView(CreateAPIView):
+    queryset = ContactFormSubmission.objects.all()
+    serializer_class = ContactFormSubmissionSerializer
+    permission_classes = [AllowAny]
