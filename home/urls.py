@@ -2,6 +2,7 @@ from django.urls import path
 from home.views import MenuCategoryListView
 from home.views import MenuItemSearchViewSet
 from home.views import MenuItemUpdateViewSet
+from .views import ContactFormSubmissionView
 
 
 urlpatterns = [
@@ -16,4 +17,8 @@ urlpatterns1 = [
 menu_item_update = MenuItemUpdateViewSet.as_view({'put': 'update'})
 urlpatterns2 = [
     path('menu-item/<int:pk>/update/', menu_item_update, name='menu-item-update'),
+]
+
+urlpatterns3 = [
+    path('contact/', ContactFormSubmissionView.as_view(), name='contact-form',)
 ]
