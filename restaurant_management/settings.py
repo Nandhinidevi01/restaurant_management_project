@@ -134,4 +134,4 @@ EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = "your_email@gmail.com"
 EMAIL_HOST_PASSWORD = "your_app_password"
-DEFAULT_FROM_EMAIL = "Your Restaurant <your_email@gmail.com>"
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
