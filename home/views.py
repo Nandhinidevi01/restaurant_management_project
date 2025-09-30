@@ -11,10 +11,8 @@ from home.serializers import MenuItemSerializer
 from rest_framework.pagination import PageNumberPagination
 from rest_framework import status, viewsets
 from rest_framework.permissions import IsAdminUser
-from rest_framework.generics import CreateAPIView
-from rest_framework.permissions import AllowAny
-from .models import ContactFormSubmission
-from .serializers import ContactFormSubmissionSerializer
+from rest_framework.decorators import api_view
+from .utils import send_email
 
 
 class MenuCategoryListView(ListAPIView):
@@ -70,7 +68,16 @@ class MenuItemUpdateViewSet(viewsets.viewSet):
 
         return Response(serializer.errors, status=status.HTTP_404_BAD_REQUEST)
 
-class ContactFormSubmissionView(CreateAPIView):
-    queryset = ContactFormSubmission.objects.all()
-    serializer_class = ContactFormSubmissionSerializer
-    permission_classes = [AllowAny]
+@api_view(['POST'])
+def contact_restaurant(request):
+    name = request.data.get("name")
+    email = request.data.get("email")
+    message = request.data.get("message")
+
+    subject = f"New COntact Form Submission from {name}"
+    body = f"Name: {name}\nEmail: {email}\nMessage:\n{message}"
+
+    if send_email("restaurant@example.com", subject, body):
+        return Response({"message": "Your message was sent successfully."}, status=200)
+    else:
+        return Response({"error": "Failed to send email."}, status=500)
