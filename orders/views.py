@@ -13,7 +13,7 @@ from .serializers import OrderSerializer
 from rest_framework.generics import RetrieveAPIView
 from .serializers import OrderDetailSerializer
 from orders.utils import send_order_confirmation_email
-from .utils import generate_unique_order_id
+from django.shortcuts import get_object_or_404
 
 
 class SignupView(views.APIView):
@@ -66,12 +66,21 @@ def place_order(request):
     )
     print(response)  #for debugging
 
+class CancelOrderView(APIView):
+    permission_classes = [IsAuthenticated]
 
-def create_order(request):
-    if request.method == 'POST':
-        order = Order.objects.create(
-            order_id=generate_unique_order_id(),
-            customer_name=request.POST.get('customer_name'),
-            total_amount=request.POST.get('total_amount')
-        )
-        return render(request, 'orde_succes.html', {'order': oreder})
+    def delete(self, request, order_id):
+        order = get_object_or_404(Order, id=order_id)
+
+        if order.user != request.user:
+            return Response({"error": "You are not authorized to cancel this order."},status=status.HTTP_403_FORBIDDEN)
+
+        if order.status in ["Cancelled", "Completed"]:
+            return Response({"error": f"Order already {order.status}."}, status=status.HTTP_400_BAD_REQUEST)
+
+        order.status = "Cancelled"
+        Order.save()
+
+        return Response({"message": "Order Cancelled successfully.",
+                        "order": OrderSerializer(order).data},
+                        status=status.HTTP_200_OK)
