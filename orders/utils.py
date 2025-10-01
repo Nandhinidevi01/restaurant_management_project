@@ -1,8 +1,10 @@
 import string
 import secrets
 from orders.models import Coupon  #Assuming you have a Coupon model
+from django.db.models import Sum
 from .models import Order
-
+from datetime import date
+from orders.utils import get_daily_sales_total
 
 def generate_coupon_code(length=10):
     """
@@ -57,21 +59,22 @@ def send_order_confirmation_email(order_id, customer_email, user_name, total_pri
         logger.error(f"Error sending order confirmation email: {e}")
         return {"success": False, "message": f"Failed to send email: {e}"}
 
-def generate_unique_order_id(length=8):
+def get_daily_sales_total(date):
     """
-    Generate a unique, short alphanumeric ID for orders.
+    Calculate total sales for a given day.
 
     Args:
-        length (int): Length of the generated ID, Default is 8.
+        date (datetime.date): The date for which sales should be calculated.
 
     Returns:
-        str: A unique order ID.
+        Decimal: Total sales for the day. Returns 0 if no orders found.
     """
-    characters = string.ascii_upperCase + string.digits
-    while True:
-        #generate a random string
-        new_id = ''.join(secrets.choice(characters) for _ in range(length))
+    total = (
+        Order.objects.filter(created_at_date=date)
+        .aggregate(total_sum=Sum('total_price'))
+        .get('total_sum')
+    )
+    return total or 0
 
-        #check if the ID already exixts in the database
-        if not Order.objects.filter(order_id=new_id).exists():
-            return new_id
+today = date.today()
+print(get_daily_sales_total(today))
