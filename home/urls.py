@@ -2,7 +2,7 @@ from django.urls import path
 from home.views import MenuCategoryListView
 from home.views import MenuItemSearchViewSet
 from home.views import MenuItemUpdateViewSet
-from .views import ContactFormSubmissionView
+from .views import TableDetailView
 
 
 urlpatterns = [
@@ -20,5 +20,5 @@ urlpatterns2 = [
 ]
 
 urlpatterns3 = [
-    path('contact/', ContactFormSubmissionView.as_view(), name='contact-form',)
+    path("api/tables/<int:pk>/", TableDetailView.as_view(),name="table-detail"),
 ]
