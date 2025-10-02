@@ -3,6 +3,7 @@ from home.views import MenuCategoryListView
 from home.views import MenuItemSearchViewSet
 from home.views import MenuItemUpdateViewSet
 from .views import TableDetailView
+from .views import AvailableTablesAPIView
 
 
 urlpatterns = [
@@ -21,4 +22,8 @@ urlpatterns2 = [
 
 urlpatterns3 = [
     path("api/tables/<int:pk>/", TableDetailView.as_view(),name="table-detail"),
+]
+
+urlpatterns4 = [
+    path('api/tables/available/', AvailableTablesAPIView.as_view(), name='available_tables_api'),
 ]
