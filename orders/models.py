@@ -7,6 +7,7 @@ from django.contrib.auth.models import User
 from menu.models import MenuItem
 from .models import OrderStatus
 from decimal import Decimal 
+from django.utils import timeZone
 
 
 class order(models.Model):
@@ -148,3 +149,13 @@ class OrderItem(models.Model):
 
     def __str__(self):
         return f"{self.quantity} x {self.menu_item.name} (order {self.order.id})"
+
+class Coupon(models.Model):
+    code = models.CharField(max_length=50, unique=True)
+    discount_percentage = models.DecimalField(max_digits=5, decimal_places=2)
+    is_active = models.BooleanField(default=True)
+    valid_from = models.DateField()
+    valid_until = models.DateField()
+
+    def __str__(self):
+        return f"{self.code} ({self.discount_percentage}% off)"
