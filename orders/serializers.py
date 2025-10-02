@@ -1,5 +1,7 @@
 from rest_framework import serializers
 from .models import Order, OrderItem
+from .models import Coupon
+
 
 class OrderItemSerializer(serializers.ModelSerializer):
     menu_item_name = serializers.CharField(source="menu_item.name", read_only=True)
@@ -23,4 +25,8 @@ class OrderDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = Order
         fields = ["id", "user", "created_at", "total_price", "status_name", "items"]
-        
+
+class CouponSerislizer(serializers.ModelSerializer):
+    class Meta:
+        model = Coupon
+        fields = ['code', 'discount_percentage', 'is_active', 'valid_from', 'valid_until']
