@@ -13,6 +13,9 @@ from rest_framework import status, viewsets
 from rest_framework.permissions import IsAdminUser
 from rest_framework.decorators import api_view
 from .utils import send_email
+from rest_framework import generics
+from .models import Table
+from .serializers import TableSerializer
 
 
 class MenuCategoryListView(ListAPIView):
@@ -81,3 +84,8 @@ def contact_restaurant(request):
         return Response({"message": "Your message was sent successfully."}, status=200)
     else:
         return Response({"error": "Failed to send email."}, status=500)
+
+class TableDetailView(generics.RetrieveAPIView):
+    queryset = Table.objects.all()
+    serializer_class = TableSerializer
+    lookup_field = "pk" # Default, can be omitted
