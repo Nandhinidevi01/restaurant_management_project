@@ -127,3 +127,29 @@ class UpdateOrderStatusView(APIView):
             }, status=status.HTTP_200_OK)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class UpdateOrderStatusAPIView(APIView):
+    def post(self, request):
+        order_id = request.data.get('order_id')
+        new_status = request.data.get('status')
+
+        if not order_id:
+            return Response({"error": "Order ID is required."}, status=status.HTTP_400_BAD_REQUEST)
+
+        order = get_object_or_404(Order, id=order_id)
+
+        valid_statuses = [choice[0] for choice in Order, STATUS_CHOICES]
+        if new_status not in valid_statuses:
+            return Response(
+                {"error": f"Invalid status. Allowed statuses:{', '.join(valid_statuses)}"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        order.status = new_status
+        order.save()
+
+        return Response({
+            "message": "Order status updates successfully.",
+            "order_id": order.id,
+            "new_status": order.status
+        }, status=status.HTTP_200_OK)
