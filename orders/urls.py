@@ -3,6 +3,7 @@ from .views import OrderHistoryView
 from .views import OrderDetailView
 from .views import CancelOrderView
 from .views import CouponValidationView
+from .views import UpdateOrderStatusView
 
 
 urlpatterns = [
@@ -19,4 +20,8 @@ urlpatterns2 = [
 
 urlpatterns3 = [
     path('coupons/validate/', CouponValidationView.as_view(), name='coupon_validate')
+]
+
+urlpatterns4 = [
+    path('orders/<int:order_id>/update_status/', UpdateOrderStatusView.as_view(), name='update-order-status'),
 ]
