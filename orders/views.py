@@ -17,6 +17,7 @@ from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from .models import Coupon
 from .serializers import CouponSerializer
+from .serializers import OrderStatusUpdateSerializer
 
 
 class SignupView(views.APIView):
@@ -111,3 +112,18 @@ class CouponValidationView(APIView):
 
         else:
             return Response({"error": "Coupon is expired or not yet valid"}, status=status.HTTP_400_BAD_REQUEST)
+
+class UpdateOrderStatusView(APIView):
+    def put(self, request, order_id):
+        order = get_object_or_404(Order, id=order_id)
+        serializer = OrderStatusUpdateSerializer(order, data=request.data, partial=True)
+
+        if serializer.is_valid():
+            serializer.save()
+            return Response({
+                "message": "Order status updated successfully.",
+                "order_id": order.id,
+                "new_status": serializer.data['status']
+            }, status=status.HTTP_200_OK)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
