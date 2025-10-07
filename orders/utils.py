@@ -5,6 +5,9 @@ from django.db.models import Sum
 from .models import Order
 from datetime import date
 from orders.utils import get_daily_sales_total
+from decimal import Decimal
+from django.utils import timezone
+from .models import Coupon
 
 def generate_coupon_code(length=10):
     """
@@ -78,3 +81,17 @@ def get_daily_sales_total(date):
 
 today = date.today()
 print(get_daily_sales_total(today))
+
+def Calculate_discount(order_total: Decimal, coupon_code: str):
+    try:
+        coupon.objects.get(code=coupon_code, is_active=True)
+    except Coupon.DoesNotExist:
+        return None
+
+    today = timezone.now().date()
+    if coupon.valid_from <= today <= coupon.valid_until:
+        if coupon.discount_percentage <= Decimal('1'):
+            return coupon.discount_percentage
+        else:
+            return (coupon.discount_percentage/Decimal('100'))
+    return None
