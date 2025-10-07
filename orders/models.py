@@ -7,6 +7,9 @@ from menu.models import MenuItem
 from .models import OrderStatus
 from decimal import Decimal 
 from django.utils import timeZone
+from decimal import Decimal, ROUND_HALF_UP
+import logging
+from django.conf import settings
 
 
 class order(models.Model):
@@ -174,3 +177,59 @@ class Order(models.Model):
 
     def __str__(self):
         return f"Order #{self.id} - {self.status}"
+
+logger = logging.getLogger(__name__)
+
+try:
+    from .utils import calculate_discount
+except Exception:
+    calculate_discount = None
+    logger.debug("calculate_discount utility not available; discounts will be skipped.")
+
+class Order(models.Model):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True)
+    total_price = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal('0.00'))
+    status = models.CharField(max_length=20, default='pending')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def calculate_total(self, apply_discount: bool = True, coupon_code: str = None, save: bool = False) -> Decimal:
+        total = Decimal('0.00')
+
+        for item in getattr(self, 'items').all():
+            price = item.price if item.price is not None else Decimal('0.00')
+            qty = getattr(item, 'quantity', 1) or 0
+
+            line_total = (Decimal(price) * Decimal(qty))
+            total += line_total
+
+        total = total.quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+
+        if apply_discount and coupon_code and calculate_discount:
+            try:
+                discount_value = calculate_discount(total, coupon_code)
+                if discount_value is None:
+                    pass
+                else:
+                    discount_dec = Decimal(str(discount_value))
+
+                    if Decimal('0') < discount_dec <= Decimal('1'):
+                        discount_amount = (total * discount_dec).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+
+                        else:
+                            discount_amount = discount_dec.quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+
+                        total_after = total - discount_amount
+                        if total_after < Decimal('0.00'):
+                            total_after = Decimal('0.00')
+                        total = total_after.quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+                except Exception as exc:
+                    logger.exception("Error applying discount for order %s with coupon '%s':%s", self.pk, coupon_code, exc)
+            
+            if save:
+                try:
+                    self.total_price = total
+                    self.save(update_fields=['total_price'])
+                except Exception:
+                    logger.exception("Failed to save calculated total for order %s", getattr(self, 'pk', None))
+
+            return total
