@@ -16,6 +16,7 @@ from .utils import send_email
 from rest_framework import generics
 from .models import Table
 from .serializers import TableSerializer
+from .serializers import DailySpecialSerializer
 
 
 class MenuCategoryListView(ListAPIView):
@@ -95,3 +96,7 @@ class AvailableTablesAPIView(generics.ListAPIView):
 
     def get_queryset(self):
         return Table.objects.filter(is_available=True)
+
+class DailySpecialListView(generics.ListAPIView):
+    queryset = MenuItem.objects.filter(is_daily_special=True)
+    serializer_class = DailySpecialSerializer
