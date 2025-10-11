@@ -4,6 +4,7 @@ from home.views import MenuItemSearchViewSet
 from home.views import MenuItemUpdateViewSet
 from .views import TableDetailView
 from .views import AvailableTablesAPIView
+from .views import DailySpecialListView
 
 
 urlpatterns = [
@@ -26,4 +27,8 @@ urlpatterns3 = [
 
 urlpatterns4 = [
     path('api/tables/available/', AvailableTablesAPIView.as_view(), name='available_tables_api'),
+]
+
+urlpatterns5 = [
+    path('daily-specials/', DailySpecialListView.as_view(), name='daily-specials'),
 ]
