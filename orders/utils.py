@@ -1,13 +1,8 @@
 import string
 import secrets
 from orders.models import Coupon  #Assuming you have a Coupon model
-from django.db.models import Sum
 from .models import Order
-from datetime import date
-from orders.utils import get_daily_sales_total
-from decimal import Decimal
-from django.utils import timezone
-from .models import Coupon
+from django.core.exceptions import ObjectDoesNotExist
 
 def generate_coupon_code(length=10):
     """
@@ -62,36 +57,68 @@ def send_order_confirmation_email(order_id, customer_email, user_name, total_pri
         logger.error(f"Error sending order confirmation email: {e}")
         return {"success": False, "message": f"Failed to send email: {e}"}
 
-def get_daily_sales_total(date):
+def generate_unique_order_id(length=8):
     """
-    Calculate total sales for a given day.
+    Generate a unique, short alphanumeric ID for orders.
 
     Args:
-        date (datetime.date): The date for which sales should be calculated.
+        length (int): Length of the generated ID, Default is 8.
 
     Returns:
-        Decimal: Total sales for the day. Returns 0 if no orders found.
+        str: A unique order ID.
     """
-    total = (
-        Order.objects.filter(created_at_date=date)
-        .aggregate(total_sum=Sum('total_price'))
-        .get('total_sum')
-    )
-    return total or 0
+    characters = string.ascii_upperCase + string.digits
+    while True:
+        #generate a random string
+        new_id = ''.join(secrets.choice(characters) for _ in range(length))
 
-today = date.today()
-print(get_daily_sales_total(today))
+        #check if the ID already exixts in the database
+        if not Order.objects.filter(order_id=new_id).exists():
+            return new_id
 
-def Calculate_discount(order_total: Decimal, coupon_code: str):
+logger = logging.getLogger(__name__)
+
+def update_order_status(order_id, new_status):
+    """
+    Update the status of an order given its ID and a new status value.
+
+    Args:
+        order_id (int): The ID of the order to update.
+        new_status (str): The new status to assign to the order.
+
+    Returns:
+        dict: A dictionary containing the result or error message.
+    """
     try:
-        coupon.objects.get(code=coupon_code, is_active=True)
-    except Coupon.DoesNotExist:
-        return None
+        #Retrieve the order from the database
+        order = Order.objects.get(id=order_id)
 
-    today = timezone.now().date()
-    if coupon.valid_from <= today <= coupon.valid_until:
-        if coupon.discount_percentage <= Decimal('1'):
-            return coupon.discount_percentage
-        else:
-            return (coupon.discount_percentage/Decimal('100'))
-    return None
+        #store old status for logging
+        old_status = order.status
+
+        #update status
+        order.status = new_status
+        order.save()
+
+        #Log the change
+        logger.info(f"Order ID {order_id} status changed from '{old_status}' to '{new_status}'")
+
+        return {
+            "success": True,
+            "message": f"Order {order_id} status updated successfully",
+            "old_status": old_status,
+            "new_status": new_status
+        }
+    except ObjectDoesNotExist:
+        logger.error(f"order ID {order_id} not found.")
+        return {
+            "success": False,
+            "error": "Order not found"
+        }
+
+    except Exception as e:
+        logger.exception(f"Error updating order {order_id}: {e}")
+        return {
+            "success": False,
+            "error": str(e)
+        }
