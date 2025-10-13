@@ -5,6 +5,7 @@ from home.views import MenuItemUpdateViewSet
 from .views import TableDetailView
 from .views import AvailableTablesAPIView
 from .views import DailySpecialListView
+from .views import UserReviewCreateView, MenuItemReviewsView
 
 
 urlpatterns = [
@@ -31,4 +32,9 @@ urlpatterns4 = [
 
 urlpatterns5 = [
     path('daily-specials/', DailySpecialListView.as_view(), name='daily-specials'),
+]
+
+urlpatterns6 = [
+    path('reviews/create/', UserReviewCreateView.as_view(), name='create_review'),
+    path('reviews/<int:menu_item_id>/', MenuItemReviewsView.as_view(), name='menu_item_reviews'),
 ]
