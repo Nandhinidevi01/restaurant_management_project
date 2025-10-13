@@ -13,10 +13,14 @@ from rest_framework import status, viewsets
 from rest_framework.permissions import IsAdminUser
 from rest_framework.decorators import api_view
 from .utils import send_email
-from rest_framework import generics
+from rest_framework import generics, permissions
 from .models import Table
 from .serializers import TableSerializer
 from .serializers import DailySpecialSerializer
+from .models import UserReview
+from .serializers import UserReviewSerializer
+from rest_framework.views import APIView 
+
 
 
 class MenuCategoryListView(ListAPIView):
@@ -100,3 +104,23 @@ class AvailableTablesAPIView(generics.ListAPIView):
 class DailySpecialListView(generics.ListAPIView):
     queryset = MenuItem.objects.filter(is_daily_special=True)
     serializer_class = DailySpecialSerializer
+
+class UserReviewCreateView(generics.CreateAPIView):
+    queryset = UserReview.objects.all()
+    serializer_class = UserReviewSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+
+class MenuItemReviewsView(APIView):
+    """
+    Retrieve all reviews for a given menu_item_id
+    """
+    def get(self, request, menu_item_id):
+        reviews = UserReview.objects.filter(menu_item_id=menu_item_id)
+        if not reviews.exists():
+            return Response({"message": "No reviews found for this item."}, status=status.HTTP_404_BAD_REQUEST)
+
+        serializer = UserReviewSerializer(reviews, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
