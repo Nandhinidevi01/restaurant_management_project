@@ -19,7 +19,10 @@ from .serializers import TableSerializer
 from .serializers import DailySpecialSerializer
 from .models import UserReview
 from .serializers import UserReviewSerializer
-from rest_framework.views import APIView 
+from rest_framework.views import APIView
+from rest_framework import permissions
+from .models import MenuCategory
+from .serializers import MenuCategorySerializer 
 
 
 
@@ -124,3 +127,12 @@ class MenuItemReviewsView(APIView):
 
         serializer = UserReviewSerializer(reviews, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+class MenuCategoryViewSet(viewsets.ModelViewSet):
+    """
+    API endpoint that allows menu categories to be viewed or edited.
+    Supports: list, retrieve, create, update, and delete.
+    """
+    queryset = MenuCategory.objects.all()
+    serializer_class = MenuCategorySerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
