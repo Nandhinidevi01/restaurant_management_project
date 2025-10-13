@@ -58,3 +58,12 @@ class UserReview(models.Model):
 
     def __str__(self):
         return f"Review by {self.user.username} for {self.menu_item.name} - {self.rating}/5"
+
+class MenuCategory(models.Model):
+    """
+    Model respresenting a menu category (e.g., Starters, Desserts, Beverages).
+    """
+    name = models.CharField(max_length=100, unique=True)
+
+    def __str__(self):
+        return self.name
