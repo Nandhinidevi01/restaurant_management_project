@@ -13,11 +13,8 @@ from .serializers import OrderSerializer
 from rest_framework.generics import RetrieveAPIView
 from .serializers import OrderDetailSerializer
 from orders.utils import send_order_confirmation_email
-from django.shortcuts import get_object_or_404
-from django.utils import timezone
-from .models import Coupon
-from .serializers import CouponSerializer
-from .serializers import OrderStatusUpdateSerializer
+from .utils import generate_unique_order_id
+from rest_framework.decorators import api_view
 
 
 class SignupView(views.APIView):
@@ -70,86 +67,28 @@ def place_order(request):
     )
     print(response)  #for debugging
 
-class CancelOrderView(APIView):
-    permission_classes = [IsAuthenticated]
 
-    def delete(self, request, order_id):
-        order = get_object_or_404(Order, id=order_id)
+def create_order(request):
+    if request.method == 'POST':
+        order = Order.objects.create(
+            order_id=generate_unique_order_id(),
+            customer_name=request.POST.get('customer_name'),
+            total_amount=request.POST.get('total_amount')
+        )
+        return render(request, 'orde_succes.html', {'order': oreder})
 
-        if order.user != request.user:
-            return Response({"error": "You are not authorized to cancel this order."},status=status.HTTP_403_FORBIDDEN)
-
-        if order.status in ["Cancelled", "Completed"]:
-            return Response({"error": f"Order already {order.status}."}, status=status.HTTP_400_BAD_REQUEST)
-
-        order.status = "Cancelled"
-        Order.save()
-
-        return Response({"message": "Order Cancelled successfully.",
-                        "order": OrderSerializer(order).data},
-                        status=status.HTTP_200_OK)
-
-class CouponValidationView(APIView):
-    def post(self, request, *args, **kwargs):
-        code = request.data.get('code')
-
-        if not code:
-            return Response({"error": "Coupon code is required"}, status=status.HTTP_400_BAD_REQUEST)
-
-        try:
-            Coupon = Coupon.objects.get(code=code, is_active=True)
-        except Coupon.DoesNotExist:
-            return Response({"error": "Invalid or inactive coupon code"}, status=status.HTTP_400_BAD_REQUEST)
-
-        today = timezone.now().date()
-        if coupon.valid_from <= today <= coupon.valid_until:
-            serializer = CouponSerializer(coupon)
-            return Response({
-                "success": True,
-                "discount_percentage": coupon.discount_percentage,
-                "coupon": serializer.data
-            }, status=status.HTTP_200_OK)
-
-        else:
-            return Response({"error": "Coupon is expired or not yet valid"}, status=status.HTTP_400_BAD_REQUEST)
-
-class UpdateOrderStatusView(APIView):
-    def put(self, request, order_id):
-        order = get_object_or_404(Order, id=order_id)
-        serializer = OrderStatusUpdateSerializer(order, data=request.data, partial=True)
-
-        if serializer.is_valid():
-            serializer.save()
-            return Response({
-                "message": "Order status updated successfully.",
-                "order_id": order.id,
-                "new_status": serializer.data['status']
-            }, status=status.HTTP_200_OK)
-
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-class UpdateOrderStatusAPIView(APIView):
-    def post(self, request):
-        order_id = request.data.get('order_id')
-        new_status = request.data.get('status')
-
-        if not order_id:
-            return Response({"error": "Order ID is required."}, status=status.HTTP_400_BAD_REQUEST)
-
-        order = get_object_or_404(Order, id=order_id)
-
-        valid_statuses = [choice[0] for choice in Order, STATUS_CHOICES]
-        if new_status not in valid_statuses:
-            return Response(
-                {"error": f"Invalid status. Allowed statuses:{', '.join(valid_statuses)}"},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-
-        order.status = new_status
-        order.save()
-
+@api_view(['GET'])
+def get_order_status(request, order_id):
+    """
+    Retrieve the current status of an order by ID.
+    """
+    try:
+        order = Order.objects.get(id=order_id)
         return Response({
-            "message": "Order status updates successfully.",
             "order_id": order.id,
-            "new_status": order.status
+            "status": order.status
         }, status=status.HTTP_200_OK)
+    except Order.DoesNotExist:
+        return Response({
+            "error": "order not found"
+        }, status=status.HTTP_400_BAD_REQUEST)
