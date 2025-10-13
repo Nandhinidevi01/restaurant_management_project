@@ -5,6 +5,8 @@ from .views import CancelOrderView
 from .views import CouponValidationView
 from .views import UpdateOrderStatusView
 from .views import UpdateOrderStatusAPIView
+from . import views
+
 
 urlpatterns = [
     path('order-history/', OrderHistoryView.as_view(), name='order-history'),
@@ -28,4 +30,8 @@ urlpatterns4 = [
 
 urlpatterns5 = [
     path('orders/update-status/', UpdateOrderStatusAPIView.as_view(), name='update-order-status'),
+]
+
+urlpatterns6 = [
+    path('status/<int:order_id>/', views.get_order_status, name='get_order_status'),
 ]
