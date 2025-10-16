@@ -1,12 +1,6 @@
-from django.urls import path, include
-from .views import MenuItemsByCategoryView
-from django.contrib import admin
+from django.db import path
+from .views import UpdateMenuItemAvailabilityView
 
 urlpatterns = [
-    path('menu-items-by-category/', MenuItemsByCategoryView.as_view(), name='menu-items-by-category'),
-]
-
-urlpatterns1 = [
-    path('admin/', admin.site.urls),
-    path('api/home/', include('home.urls')),
+    path('menu/<int:pk>/availability/', UpdateMenuItemAvailabilityView.as_view(), name='update-menu-availability'),
 ]
