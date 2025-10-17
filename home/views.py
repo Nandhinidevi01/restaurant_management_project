@@ -136,3 +136,14 @@ class MenuCategoryViewSet(viewsets.ModelViewSet):
     queryset = MenuCategory.objects.all()
     serializer_class = MenuCategorySerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+    from .utils import calculate_order_total
+
+    def sample_order_view(request):
+        order_item = [
+            {"price": 100.0, "quantity": 2},
+            {"price": 50.0, "quantity": 3},
+        ]
+        total = calculate_order_total(order_item)
+        print("order Total:", total)
+        return JsonResponse({"total": total})
