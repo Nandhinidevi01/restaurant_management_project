@@ -66,3 +66,18 @@ def is_restaurant_open():
     return open_time <= current_time <= close_time
 
 print(is_restaurant_open())
+
+def Calculate_order_total(order_items):
+    """
+    Utility function to calculate the total price of an order.
+    """
+    if not order_items:
+        return 0.0
+    
+    total = 0.0
+    for item in order_items:
+        price = item.get('price', 0)
+        quantity = item.get('quantity',0)
+        if isinstance(price, (int, float)) and isinstance(quantity,int):
+            total += price * quantity
+    return round(total, 2)
