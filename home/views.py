@@ -147,3 +147,7 @@ class MenuCategoryViewSet(viewsets.ModelViewSet):
         total = calculate_order_total(order_item)
         print("order Total:", total)
         return JsonResponse({"total": total})
+
+class MenuCategoryViewSet(viewSets.ModelViewSet):
+    queryset = MenuCategory.objects.all()
+    serializer_class = MenuCategorySerializer
