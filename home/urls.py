@@ -4,7 +4,11 @@ from home.views import MenuItemSearchViewSet
 from home.views import MenuItemUpdateViewSet
 from .views import TableDetailView
 from .views import AvailableTablesAPIView
+from .views import DailySpecialListView
+from .views import UserReviewCreateView, MenuItemReviewsView
 from django.urls import include
+from rest_framework.routers import DefaultRouter
+from .views import MenuCategoryViewSet
 
 
 urlpatterns = [
@@ -30,5 +34,24 @@ urlpatterns4 = [
 ]
 
 urlpatterns5 = [
-    path('api/', include('menu.urls')),
+    path('daily-specials/', DailySpecialListView.as_view(), name='daily-specials'),
+]
+
+urlpatterns6 = [
+    path('reviews/create/', UserReviewCreateView.as_view(), name='create_review'),
+    path('reviews/<int:menu_item_id>/', MenuItemReviewsView.as_view(), name='menu_item_reviews'),
+]
+
+router = DefaultRouter()
+router.register(r'categories', MenuCategoryViewSet, basename='menu-category')
+
+urlpatterns7 = [
+    path('', include(router.urls)),
+]
+
+router = DefaultRouter()
+router.register(r'menu-categories', MenuCategoryViewSet, basename='menu-category')
+
+urlpatterns8 = [
+    path('', include(router.urls)),
 ]
