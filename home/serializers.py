@@ -2,7 +2,9 @@ from rest_framework import serializers
 from home.models import MenuCategory
 from home.models import MenuItem  #assuming you have a MenuItem model
 from .models import Table
-from .models import Review
+from .models import UserReview
+from .models import MenuCategory
+
 
 class MenuCategorySerializer(serializers.ModelSerializer):
     """
@@ -31,16 +33,34 @@ class TableSerializer(serializers.ModelSerializer):
         model = Table
         fields = ['id', 'table_number', 'capacity', 'is_available']
 
-class ReviewSerializer(serializers.ModelSerializer):
-    """
-    Serializer for the Review model to validate and serializer review data.
-    """
+class DailySpecialSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Review
-        fields = ['id', 'user', 'rating', 'text', 'created_at']
+        model = MenuItem
+        fields = ['id', 'name', 'description', 'price']
+
+class UserReviewSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserReview
+        fields = ['id', 'user', 'menu_item', 'rating', 'comment', 'created_at']
         read_only_fields = ['id', 'created_at']
 
     def validate_rating(self, value):
-        if not 1 <= value <= 5:
+        """Ensure rating is between 1 and 5."""
+        if value < 1 or value > 5:
             raise serializers.ValidationError("Rating must be between 1 and 5.")
         return value
+
+class MenuCategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MenuCategory
+        fields = ['id', 'name']
+
+class MenuCategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MenuCategory
+        fields = '__all__'
+
+class MenuCategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = MenuCategory
+        fields = ['id', 'name']
