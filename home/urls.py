@@ -4,11 +4,9 @@ from home.views import MenuItemSearchViewSet
 from home.views import MenuItemUpdateViewSet
 from .views import TableDetailView
 from .views import AvailableTablesAPIView
-from .views import DailySpecialListView
-from .views import UserReviewCreateView, MenuItemReviewsView
 from django.urls import include
-from rest_framework.routers import DefaultRouter
-from .views import MenuCategoryViewSet
+from .views import ReviewCreateAPIView
+from .views import MenuItemIngredientsView
 
 
 urlpatterns = [
@@ -34,28 +32,13 @@ urlpatterns4 = [
 ]
 
 urlpatterns5 = [
-    path('daily-specials/', DailySpecialListView.as_view(), name='daily-specials'),
+    path('api/', include('menu.urls')),
 ]
 
 urlpatterns6 = [
-    path('reviews/create/', UserReviewCreateView.as_view(), name='create_review'),
-    path('reviews/<int:menu_item_id>/', MenuItemReviewsView.as_view(), name='menu_item_reviews'),
+    path('reviews/create/', ReviewCreateAPIView.as_view(), name='create-review'),
 ]
-
-router = DefaultRouter()
-router.register(r'categories', MenuCategoryViewSet, basename='menu-category')
 
 urlpatterns7 = [
-    path('', include(router.urls)),
-]
-
-router = DefaultRouter()
-router.register(r'menu-categories', MenuCategoryViewSet, basename='menu-category')
-
-urlpatterns8 = [
-    path('', include(router.urls)),
-]
-
-urlpatterns9 = [
-    path('menu-categories/', MenuCategoryListView.as_view(), name='menu-category-list'),
+    path('api/menu-items/<int:pk>/ingredients/', MenuItemIngredientsView.as_view(), name='menu-item-ingredients'),
 ]
