@@ -20,6 +20,7 @@ from rest_framework.views import APIView
 from .serializers import ReviewSerializer
 from home.models import DailySpecial
 from django.shortcuts import render
+from .serializers import MenuItemIngredientsSerializer
 
 
 class MenuCategoryListView(ListAPIView):
@@ -121,3 +122,18 @@ class ReviewCreateAPIView(APIView):
 def homepage(request):
     special = DailySpecial.get_random_special()
     return render(request, 'home/index.html', {'special': special})
+
+class MenuItemIngredientsView(generics.RetrieveAPIView):
+    """
+    API endpoint to get all ingredients for a specific menu item by ID.
+    """
+    queryset = MenuItem.objects.all()
+    serializer_class = MenuItemIngredientsSerializer
+
+    def get(self, request, *args, **kwargs):
+        try:
+            menu_item = self.get_object()
+            serializer = self.get_serializer(menu_item)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except MenuItem.DoesNotExist:
+            return Response({'error':'Menu item not found'}, status=status.HTTP_404_NOT_FOUND)
