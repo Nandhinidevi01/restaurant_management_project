@@ -45,3 +45,18 @@ class DailySPecial(models.Model):
         if not specials.exists():
             return None
         return specials.order_by('?').first()
+
+class Ingredient(models.Model):
+    name = models.CharField(max_length=100)
+
+    def __str__(self):
+        return self.name
+
+class MenuItem(models.Model):
+    name = models.CharField(max_length=100)
+    description = models.TextField()
+    price = models.DecimalField(max_length=6, decimal_places=2)
+    ingredients = models.ManyToManyField(Ingredient, related_name='menu_items', blank=True)
+
+    def __str__(self):
+        return self.name
