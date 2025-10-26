@@ -13,17 +13,13 @@ from rest_framework import status, viewsets
 from rest_framework.permissions import IsAdminUser
 from rest_framework.decorators import api_view
 from .utils import send_email
-from rest_framework import generics, permissions
+from rest_framework import generics
 from .models import Table
 from .serializers import TableSerializer
-from .serializers import DailySpecialSerializer
-from .models import UserReview
-from .serializers import UserReviewSerializer
-from rest_framework.views import APIView
-from rest_framework import permissions
-from .models import MenuCategory
-from .serializers import MenuCategorySerializer 
-
+from rest_framework.views import APIView 
+from .serializers import ReviewSerializer
+from home.models import DailySpecial
+from django.shortcuts import render
 
 
 class MenuCategoryListView(ListAPIView):
@@ -104,54 +100,24 @@ class AvailableTablesAPIView(generics.ListAPIView):
     def get_queryset(self):
         return Table.objects.filter(is_available=True)
 
-class DailySpecialListView(generics.ListAPIView):
-    queryset = MenuItem.objects.filter(is_daily_special=True)
-    serializer_class = DailySpecialSerializer
-
-class UserReviewCreateView(generics.CreateAPIView):
-    queryset = UserReview.objects.all()
-    serializer_class = UserReviewSerializer
-    permission_classes = [permissions.IsAuthenticated]
-
-    def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
-
-class MenuItemReviewsView(APIView):
+class ReviewCreateAPIView(APIView):
     """
-    Retrieve all reviews for a given menu_item_id
+    API endpoint tp handle the creation of user reviews via POST request.
     """
-    def get(self, request, menu_item_id):
-        reviews = UserReview.objects.filter(menu_item_id=menu_item_id)
-        if not reviews.exists():
-            return Response({"message": "No reviews found for this item."}, status=status.HTTP_404_BAD_REQUEST)
 
-        serializer = UserReviewSerializer(reviews, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+    def post(self, request, *args, **kwargs):
+        serializer = ReviewSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(
+                {"message": "Review created successfully!", "data": serializer.data},
+                status=status.HTTP_200_CREATED
+            )
+        return Response(
+            {"errors": serializer.errors},
+            status=status.HTTP_404_BAD_REQUEST
+        )
 
-class MenuCategoryViewSet(viewsets.ModelViewSet):
-    """
-    API endpoint that allows menu categories to be viewed or edited.
-    Supports: list, retrieve, create, update, and delete.
-    """
-    queryset = MenuCategory.objects.all()
-    serializer_class = MenuCategorySerializer
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
-
-    from .utils import calculate_order_total
-
-    def sample_order_view(request):
-        order_item = [
-            {"price": 100.0, "quantity": 2},
-            {"price": 50.0, "quantity": 3},
-        ]
-        total = calculate_order_total(order_item)
-        print("order Total:", total)
-        return JsonResponse({"total": total})
-
-class MenuCategoryViewSet(viewSets.ModelViewSet):
-    queryset = MenuCategory.objects.all()
-    serializer_class = MenuCategorySerializer
-
-class MenuCategoryListView(generics.ListAPIView):
-    queryset = MenuCategory.objects.all()
-    serializer_class = MenuCategorySerializer
+def homepage(request):
+    special = DailySpecial.get_random_special()
+    return render(request, 'home/index.html', {'special': special})
