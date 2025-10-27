@@ -137,3 +137,10 @@ class MenuItemIngredientsView(generics.RetrieveAPIView):
             return Response(serializer.data, status=status.HTTP_200_OK)
         except MenuItem.DoesNotExist:
             return Response({'error':'Menu item not found'}, status=status.HTTP_404_NOT_FOUND)
+
+class FeaturedMenuItemsView(generics.ListAPIView):
+    """
+    API view to list all featured menu items (is_featured=True)
+    """
+    queryset = MenuItem.objects.filter(is_featured=True)
+    serializer_class = MenuItemSerializer
