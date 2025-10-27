@@ -7,7 +7,7 @@ from .views import AvailableTablesAPIView
 from django.urls import include
 from .views import ReviewCreateAPIView
 from .views import MenuItemIngredientsView
-
+from .views import FeaturedMenuItemsView
 
 urlpatterns = [
     path('categories/', MenuCategoryListView.as_view(), name='menu-categories'),
@@ -41,4 +41,8 @@ urlpatterns6 = [
 
 urlpatterns7 = [
     path('api/menu-items/<int:pk>/ingredients/', MenuItemIngredientsView.as_view(), name='menu-item-ingredients'),
+]
+
+urlpatterns8 = [
+    path('featured-menu-items/', FeaturedMenuItemsView.as_view(), name='featured-menu-items'),
 ]
