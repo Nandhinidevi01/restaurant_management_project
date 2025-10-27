@@ -81,3 +81,11 @@ class OrderItem(models.Model):
     menu_item = models.ForeignKey(MenuItem, on_delete=models.CASCADE, related_name='orderitem')
     quantity = models.PositiveIntegerField(default=1)
     order = models.ForeignKey('Order', on_delete=models.CASCADE)
+
+class MenuItem(models.Model):
+    name = models.CharField(max_length=100)
+    price = models.DecimalField(max_digits=6, decimal_places=2)
+    is_featured = models.BooleanField(default=False)
+
+    def __str__(self):
+        return self.name
