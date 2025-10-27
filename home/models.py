@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 import random
+from django.db.models import Count
 
 
 class MenuCategory(models.Model):
@@ -60,3 +61,23 @@ class MenuItem(models.Model):
 
     def __str__(self):
         return self.name
+
+class MenuItemManager(models.Manager):
+    def get_top_selling_items(self, num_items=5):
+        return self.annotate(
+            total_orders=Count('orderitem')
+        ).order_by('-total_orders')[:num_items]
+
+class MenuItem(models.Model):
+    name = models.CharField(max_length=100)
+    price = models.DecimalField(max_digits=6, decimal_places=2)
+
+    objects = MenuItemManager()
+
+    def __str__(self):
+        return self.name
+
+class OrderItem(models.Model):
+    menu_item = models.ForeignKey(MenuItem, on_delete=models.CASCADE, related_name='orderitem')
+    quantity = models.PositiveIntegerField(default=1)
+    order = models.ForeignKey('Order', on_delete=models.CASCADE)
