@@ -3,7 +3,7 @@ from django.conf import settings
 import logging
 from datetime import datetime, time
 from home.utils import is_restaurant_open
-import re
+from home.models import MenuItem, Cuisine
 
 
 logger = logging.getLogger(__name__)
@@ -69,24 +69,48 @@ def is_restaurant_open():
 
 print(is_restaurant_open())
 
-def Calculate_order_total(order_items):
+def calculate_discount(original_price, discount_percentage):
     """
-    Utility function to calculate the total price of an order.
+    Calculate the discounted price based on the original price and discount percentage.
+
+    Args:
+        original_price (float): The original price of the item.
+        discount_percentage (float): The discount_percentage to apply (0-100).
+
+    Returns:
+        Float: The discounted price rounded to 2 decimal places.
+        OR
+        str: An error message if input is invalid.
     """
-    if not order_items:
-        return 0.0
-    
-    total = 0.0
-    for item in order_items:
-        price = item.get('price', 0)
-        quantity = item.get('quantity',0)
-        if isinstance(price, (int, float)) and isinstance(quantity,int):
-            total += price * quantity
-    return round(total, 2)
 
-def is_valid_email(email: str) -> bool:
-    if not email:
-        return False
-    pattern = r'^[a-zA-Z0-9,_%+-]+@[a-zA-Z0-9,-]+\,[a-zA-Z]{2,}$'
+    try:
+        # Validate input types
+        if not isinstance(original_price, (int, float)) or not isinstance(discount_percentage, (int, float)):
+            return "Error: Both inputs must be numbers."
 
-    return re.match(pattern, email) is not None
+        #Validate input ranges
+        if original_price < 0:
+            return "Error: Original price cannot be negative."
+        if discount_percentage < 0 or discount_percentage > 100:
+            return "Error: Discount percentage must be between 0 and 100."
+
+        #Calculate discounted price
+        discount_price = original_price - (original_price * (discount_percentage/100))
+        return round(discount_price, 2)
+
+    except Exception as e:
+        #Catch unexpected errors
+        return f"Error: {str(e)}"
+
+
+def get_distinct_cuisines():
+    """
+    Retrieve a list of all unique cuisine names avilable
+    across all MenuItem entries.
+
+    Returns:
+        list[str]: A list containing distinct cuisine names.
+    """
+
+    cuisines = MenuItem.objects.values_list('cuisine_name', flat=True).distinct()
+    return list(cuisines)
