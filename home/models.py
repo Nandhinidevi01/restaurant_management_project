@@ -89,3 +89,17 @@ class MenuItem(models.Model):
 
     def __str__(self):
         return self.name
+
+class Cuisine(models.Model):
+    name = models.CharField(max_length=100)
+
+    def __str__(self):
+        return self.name
+
+class MenuItem(models.Model):
+    name = models.CharField(max_length=200)
+    image = models.ImageField(upload_to='menu_images/', blank=True, null=True)
+    cuisine = models.ForeignKey(Cuisine, on_delete=models.CASCADE, related_name='menu_items')
+
+    def __str__(self):
+        return self.name
