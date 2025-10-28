@@ -8,6 +8,8 @@ from django.urls import include
 from .views import ReviewCreateAPIView
 from .views import MenuItemIngredientsView
 from .views import FeaturedMenuItemsView
+from home.views import MenuItemSearchAPIView
+
 
 urlpatterns = [
     path('categories/', MenuCategoryListView.as_view(), name='menu-categories'),
@@ -45,4 +47,8 @@ urlpatterns7 = [
 
 urlpatterns8 = [
     path('featured-menu-items/', FeaturedMenuItemsView.as_view(), name='featured-menu-items'),
+]
+
+urlpatterns9 = [
+    path('menu/search/', MenuItemSearchAPIView.as_view(), name='menu-item-search'),
 ]
