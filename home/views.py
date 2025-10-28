@@ -144,3 +144,22 @@ class FeaturedMenuItemsView(generics.ListAPIView):
     """
     queryset = MenuItem.objects.filter(is_featured=True)
     serializer_class = MenuItemSerializer
+
+class MenuItemSearchAPIView(APIView):
+    """
+    API endpoint to search menu items by name.
+    Query Parameter:
+        q (str): search term
+    Returns:
+        List of matching menu items with name and image URL.
+    """
+
+    def get(self, request):
+        query = request.GET.get('q', '')
+        if query:
+            items = MenuItem.objects.filter(name__icontains=query)
+        else:
+            items = MenuItem.objects.none()
+
+        serializer = MenuItemSerializer(items, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
