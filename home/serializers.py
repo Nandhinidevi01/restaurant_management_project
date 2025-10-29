@@ -4,6 +4,7 @@ from home.models import MenuItem  #assuming you have a MenuItem model
 from .models import Table
 from .models import Review
 from .models import Ingredient
+from .model import OpeningHour
 
 
 class MenuCategorySerializer(serializers.ModelSerializer):
@@ -68,3 +69,8 @@ class MenuItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = MenuItem
         fields = ['id', 'name', 'image']
+
+class OpeningHourSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = OpeningHour
+        fields = ['day','opening_time', 'closing_time']
