@@ -9,6 +9,7 @@ from .views import ReviewCreateAPIView
 from .views import MenuItemIngredientsView
 from .views import FeaturedMenuItemsView
 from home.views import MenuItemSearchAPIView
+from .views import OpeningHourListView
 
 
 urlpatterns = [
@@ -51,4 +52,8 @@ urlpatterns8 = [
 
 urlpatterns9 = [
     path('menu/search/', MenuItemSearchAPIView.as_view(), name='menu-item-search'),
+]
+
+urlpatterns10 = [
+    path('api/opening-hours/', OpeningHourListView.as_view(), name='opening-hours'),
 ]
