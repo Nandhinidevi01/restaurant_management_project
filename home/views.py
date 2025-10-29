@@ -21,6 +21,8 @@ from .serializers import ReviewSerializer
 from home.models import DailySpecial
 from django.shortcuts import render
 from .serializers import MenuItemIngredientsSerializer
+from .models import OpeningHour
+from .serializers import OpeningHourSerializer
 
 
 class MenuCategoryListView(ListAPIView):
@@ -163,3 +165,10 @@ class MenuItemSearchAPIView(APIView):
 
         serializer = MenuItemSerializer(items, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+class OpeningHourListView(generics.ListAPIView):
+    """
+    API endpoint that returns a list of restaurant opening hours.
+    """
+    queryset = OpeningHour.objects.all()
+    serializer_class = OpeningHourSerializer
