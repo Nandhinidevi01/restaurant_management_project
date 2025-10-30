@@ -15,7 +15,9 @@ from .serializers import OrderDetailSerializer
 from orders.utils import send_order_confirmation_email
 from .utils import generate_unique_order_id
 from rest_framework.decorators import api_view
-
+from rest_framework import generics
+from rest_framework.exceptions import NotFound
+from .serializers import OrderStatusSerializer
 
 class SignupView(views.APIView):
     def post(self, request):
@@ -92,3 +94,20 @@ def get_order_status(request, order_id):
         return Response({
             "error": "order not found"
         }, status=status.HTTP_400_BAD_REQUEST)
+
+class OrderStatusView(generics.RetrieveAPIView):
+    serializer_class = OrderStatusSerializer
+    lookup_field = 'short_id'
+
+    def get_queryset(self):
+        return Order.objects.all()
+
+    def get(self, request, *args, **kwargs):
+        short_id = kwargs.get('short_id')
+        try:
+            order = Order.objects.get(short_id=short_id)
+        except Order.DoesNotExist:
+            raise NotFound(detail="Order not found")
+
+        serializer = self.get_serializer(order)
+        return Response(serializer.data, status=status.HTTP_200_OK)
