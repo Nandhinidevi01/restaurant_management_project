@@ -41,3 +41,8 @@ class OrderStatusUpdateSerializer(serializers.ModelSerializer):
         if value not in allowed_statuses:
             raise serializers.ValidationError(f"Invalid status. Must be one of: {', '.join(allowed_statuses)}.")
         return value
+
+class OrderStatusSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Order
+        fields = ['short_id', 'status']
