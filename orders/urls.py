@@ -6,6 +6,7 @@ from .views import CouponValidationView
 from .views import UpdateOrderStatusView
 from .views import UpdateOrderStatusAPIView
 from . import views
+from .views import OrderStatusView 
 
 
 urlpatterns = [
@@ -34,4 +35,8 @@ urlpatterns5 = [
 
 urlpatterns6 = [
     path('status/<int:order_id>/', views.get_order_status, name='get_order_status'),
+]
+
+urlpatterns7 = [
+    path('status/<str:short_id>/', OrderStatusView.as_view(), name='order-status'),
 ]
